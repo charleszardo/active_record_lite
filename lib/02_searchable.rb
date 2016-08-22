@@ -15,7 +15,7 @@ module Searchable
         #{where_line}
     SQL
 
-    results.map { |result| self.new(result) }
+    parse_all(results)
   end
 end
 
