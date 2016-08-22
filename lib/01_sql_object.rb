@@ -103,10 +103,21 @@ class SQLObject
   end
 
   def update
-    # ...
+    # cols = self.class.columns.map { |col| "#{col} = ?"}
+    cols = self.class.columns.map { |col| "#{col.to_s} = ?" }.join(", ")
+    vals = self.attribute_values
+
+    DBConnection.execute(<<-SQL, *vals, id)
+      UPDATE
+        #{self.class.table_name}
+      SET
+        #{cols}
+      WHERE
+        #{self.class.table_name}.id = ?
+    SQL
   end
 
   def save
-    # ...
+    self.id.nil? ? self.insert : self.update
   end
 end
