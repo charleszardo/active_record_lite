@@ -19,11 +19,11 @@ class SQLObject
   def self.finalize!
     self.columns.each do |col|
       define_method(col) do
-        attributes[col]
+        self.attributes[col]
       end
 
       define_method("#{col}=") do |new_val|
-        attributes[col] = new_val
+        self.attributes[col] = new_val
       end
     end
   end
@@ -48,22 +48,20 @@ class SQLObject
   end
 
   def self.parse_all(results)
-    results.map do |result|
-      self.new(result)
-    end
+    results.map { |result| self.new(result) }
   end
 
   def self.find(id)
-    obj = DBConnection.execute(<<-SQL, id).first
+    results = DBConnection.execute(<<-SQL, id)
       SELECT
         #{table_name}.*
       FROM
         #{table_name}
       WHERE
-        id = ?
+        #{table_name}.id = ?
     SQL
 
-    obj ? self.new(obj) : obj
+    parse_all(results).first
   end
 
   def initialize(params = {})
@@ -86,9 +84,10 @@ class SQLObject
   end
 
   def insert
-    col_names = self.class.columns.join(", ")
-    question_marks = (['?'] * self.class.columns.length).join(", ")
-    vals = self.attribute_values
+    columns = self.class.columns.drop(1)
+    col_names = columns.map(&:to_s).join(", ")
+    question_marks = (['?'] * columns.count).join(", ")
+    vals = self.attribute_values.drop(1)
 
     DBConnection.execute(<<-SQL, *vals)
       INSERT INTO
