@@ -56,7 +56,7 @@ class SQLObject
   end
 
   def self.find(id)
-    DBConnection.execute(<<-SQL, id)
+    obj = DBConnection.execute(<<-SQL, id).first
       SELECT
         #{table_name}.*
       FROM
@@ -64,6 +64,8 @@ class SQLObject
       WHERE
         id = ?
     SQL
+
+    obj ? self.new(obj) : obj
   end
 
   def initialize(params = {})
