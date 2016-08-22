@@ -84,11 +84,16 @@ class SQLObject
   end
 
   def attribute_values
-    # ...
+    self.class.columns.map { |col| self.send(col) }
   end
 
   def insert
-    # ...
+    col_names = self.columns.join(", ")
+    question_marks = "(#{(["?"] * columns.length).join(", ")})"
+
+    p "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    p question_marks
+    p "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
   end
 
   def update
