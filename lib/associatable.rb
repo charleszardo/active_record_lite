@@ -70,7 +70,7 @@ module Associatable
     define_method(name) do
       options = self.class.assoc_options[name]
       key_val = self.send(options.primary_key)
-      
+
       options
         .model_class
         .where(options.foreign_key => key_val)
@@ -79,7 +79,6 @@ module Associatable
 
   def assoc_options
     @assoc_options ||= {}
-    @assoc_options
   end
 end
 
