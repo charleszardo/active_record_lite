@@ -15,7 +15,21 @@ module Associatable
       source_pk = source_options.primary_key
       source_fk = source_options.foreign_key
 
-      
+      key_val = self.send(through_fk)
+      DBConnection.execute(<<-SQL, key_val)
+        SELECT
+          #{source_table}.*
+        FROM
+          #{through_table}
+        JOIN
+          #{source_table}
+        ON
+          #{through_table}.#{source_fk} = #{source_table}.#{source_pk}
+        WHERE
+          #{through_table}.#{through_pk} = ?
+      SQL
+
+      source_options.model_class.parse_all(results).first
     end
   end
 end
